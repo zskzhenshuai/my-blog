@@ -4,6 +4,8 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Toaster } from '@/components/ui/toaster'
+import { StoreProvider } from '@/store'
+import { cookies } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,13 +19,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const cookieStore = cookies()
+  const userInfo: { [key: string]: any } = {}
+  cookieStore.getAll().map((cookie) => {
+    userInfo[cookie.name] = cookie.value
+  })
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        {children}
-        <Footer />
-        <Toaster />
+        <StoreProvider initialValue={{ userInfo }}>
+          <>
+            <Navbar />
+            {children}
+            <Footer />
+            <Toaster />
+          </>
+        </StoreProvider>
       </body>
     </html>
   )

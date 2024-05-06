@@ -21,8 +21,9 @@ export async function POST(request: Request & ISession, response: Response) {
   const expireMinute = '5'
   const url = `https://app.cloopen.com:8883/2013-12-26/Accounts/${accountId}/SMS/TemplateSMS?sig=${sigParameter}`
   session.verifyCode = verifyCode
-  await session.save()
-
+  request.session = session
+  await session.save(verifyCode)
+  console.log(verifyCode)
   const res: any = await instance.post(
     url,
     {

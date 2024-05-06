@@ -3,6 +3,7 @@ import { useState, ChangeEvent } from 'react'
 import CountDown from '../CountDown'
 import { useToast } from '@/components/ui/use-toast'
 import request from '@/service/fetch'
+import { useStore } from '@/store'
 
 interface IProps {
   isShow: boolean
@@ -10,6 +11,7 @@ interface IProps {
 }
 const Login = (props: IProps) => {
   const { toast } = useToast()
+  const store = useStore()
   const { isShow, onClose } = props
   const [form, setForm] = useState({
     phone: '',
@@ -40,9 +42,26 @@ const Login = (props: IProps) => {
     setIsShowVerifyCode(true)
   }
   async function handleLogin() {
-    await request.post('/api/user/login', {
+    if (!form.phone || !form.verify)
+      return toast({
+        description: '请输入信息',
+      })
+    const res: any = await request.post('/api/user/login', {
       ...form,
+      identity_type: 'phone',
     })
+    if (res.code !== 0) {
+      toast({
+        description: res.msg || '',
+      })
+    } else {
+      store.user.setUserInfo(res?.data)
+      console.log(store)
+      toast({
+        description: res.msg || '成功',
+      })
+      onClose()
+    }
   }
   function handleOAuthGithub() {}
   function handleFormChange(e: ChangeEvent<HTMLInputElement>) {
